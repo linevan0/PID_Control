@@ -2,7 +2,7 @@
 #include "pid.h"
 #include "math.h"
 
-const float Fre = 1000.0f;//²ÉÑùÂÊ£¨/hz£©
+const float Fre = 1000.0f;//é‡‡æ ·ç‡ï¼ˆ/hzï¼‰
 PID_S pid_test;
 PID_S pid_inner_test;
 void delay(int t)
@@ -16,41 +16,41 @@ void delay(int t)
 float PID_control_float(float target, float real, PID_S* PID)
 {
 	float index=1;
-	float control_value = 0.0f; //¿ØÖÆÁ¿
-	PID->err = target - real;  //Îó²îÁ¿
-	PID->err_d = Fre*(PID->err - PID->last_err);//Îó²î±ä»¯ËÙ¶È
-	PID->err_i += (PID->err)/Fre;		//ÀÛ¼ÓÆ«²î
-	if(PID->index_enable==1)//ÒıÈë±ä»ı·Ö
+	float control_value = 0.0f; //æ§åˆ¶é‡
+	PID->err = target - real;  //è¯¯å·®é‡
+	PID->err_d = Fre*(PID->err - PID->last_err);//è¯¯å·®å˜åŒ–é€Ÿåº¦
+	PID->err_i += (PID->err)/Fre;		//ç´¯åŠ åå·®
+	if(PID->index_enable==1)//å¼•å…¥å˜ç§¯åˆ†
 	{
-		if (fabs(PID->err) > PID->index_max)        //±ä»ı·Ö¹ı³Ì
+		if (fabs(PID->err) > PID->index_max)        //å˜ç§¯åˆ†è¿‡ç¨‹
 		{
 			index = 0;
 		}
 		else if (fabs(PID->err) < PID->index_min)
 		{
 			index = 1;
-			PID->err_i += PID->err;    	//ÀÛ¼ÓÆ«²î
+			PID->err_i += PID->err;    	//ç´¯åŠ åå·®
 		}
 		else
 		{
 			index = (PID->index_max - fabs(PID->err)) / (PID->index_max - (PID->index_min));
-			PID->err_i += PID->err;    	//ÀÛ¼ÓÆ«²î
+			PID->err_i += PID->err;    	//ç´¯åŠ åå·®
 		} 
 	}
 	else index = 1;
-	control_value += PID->p * PID->err;	//p¿ØÖÆ
-	control_value += PID->d * PID->err_d;	//d¿ØÖÆ
-	control_value += index * PID->i * PID->err_i;	//i¿ØÖÆ
+	control_value += PID->p * PID->err;	//pæ§åˆ¶
+	control_value += PID->d * PID->err_d;	//dæ§åˆ¶
+	control_value += index * PID->i * PID->err_i;	//iæ§åˆ¶
 
-	PID->last_err = PID->err;	//¼ÇÂ¼ÉÏ´ÎÊı¾İ
+	PID->last_err = PID->err;	//è®°å½•ä¸Šæ¬¡æ•°æ®
 
 	return control_value;
 }
 
-float cascadePID_control_float(float target, float real, PID_S* PID,  //Íâ»·²ÎÊı
-							   float inner_real, PID_S* inner_PID)//ÄÚ»·²ÎÊı
+float cascadePID_control_float(float target, float real, PID_S* PID,  //å¤–ç¯å‚æ•°
+							   float inner_real, PID_S* inner_PID)//å†…ç¯å‚æ•°
 {
-	return PID_control_float(PID_control_float(target, real, PID),//Ç¶Ì×Íâ»·¼ÆËã½á¹ûºóÊä³ö
+	return PID_control_float(PID_control_float(target, real, PID),//åµŒå¥—å¤–ç¯è®¡ç®—ç»“æœåè¾“å‡º
 							inner_real, inner_PID);
 }
 
@@ -69,22 +69,22 @@ void param_init(void)//
 
 	pid_inner_test.p = 32;//32
 	pid_inner_test.i = 0;//0
-	pid_inner_test.d = 0;//0£¬³¬¹ı1»á²»ÎÈ¶¨
+	pid_inner_test.d = 0;//0ï¼Œè¯¥å‚æ•°æœ‰ä¸€ä¸ªä¸Šé™é˜ˆå€¼ï¼Œç³»ç»ŸåŠ é€Ÿåº¦==a*æ§åˆ¶é‡æ—¶ï¼Œè¯¥å€¼ï¼ˆkdï¼‰è¶…è¿‡1/aä¼šä¸ç¨³å®š(æœ¬ç³»ç»Ÿä¸ºä¸è¶…è¿‡1)
 	pid_inner_test.err = 0;
 	pid_inner_test.last_err = 0;
 	pid_inner_test.err_d = 0;
 	pid_inner_test.err_i = 0;
 	pid_test.index_enable = 1;
 	pid_inner_test.index_max = 10;
-	pid_inner_test.index_min = 5;//ÕâÀïÈ¡µÚerrv×îÖÕ±ä»¯»ºÂıµÄÖµ
-	//µ÷²Î¼¼ÇÉ¹Ø×¢Ö¸±ê£¬1¡¢x¶ÔÓÚÄ¿±êÖµÏìÓ¦ËÙ¶ÈºÍÎÈ¶¨ĞÔ£¬2¡¢errv¶ÔÓÚ0µÄÏìÓ¦ËÙ¶ÈºÍÎÈ¶¨ĞÔ
-	//¸öÈËÍÆ¼öË³Ğò£º
-	//1¡¢ÄÚÍâ»·PË³±ãÖÃÈëÒ»¸öÖµ¡£Èç1Ê¹µÃÏµÍ³ÄÜ¹»ÃãÇ¿ÎÈ¶¨
-	//2¡¢½«Íâ»·Pµ÷Õûµ½ÄãÂúÒâµÄÏìÓ¦ËÙ¶È¡££¨Ö¸µÚÒ»´Îµ½´ïÄ¿±êÎ»ÖÃ£©
-	//3¡¢Èç¹û·¢Éú³¤ÆÚ²»ÄÜÎÈ¶¨£¬¼Ó´óÄÚ»·PÊ¹ÏµÍ³ËÙ¶È¸úËæÄÜ¹»¸üºÃµØ¸úËæÄ¿±êËÙ¶È£¨´ËÊ±Õñ¶¯ÆµÂÊ¿ÉÄÜ¸ü´ó£¬µ«ÊÇÕñ¶¯·ù¶È¸üĞ¡£©
-	//½«pµ÷Õûµ½Õñ¶¯·ù¶ÈÈÃ×Ô¼ºÂúÒâ
-	//4¡¢Èç¹ûÏµÍ³±íÏÖÁ¼ºÃÔòµ÷²ÎÍê³É£¬Èôµ÷Íê·¢ÏÖÏµÍ³ÓĞĞ¡·ù¸ßÆµÕñ¶¯£¬½«ÄÚ»·dµ÷Õûµ½×î¸ß0.99£¨²»³¬¹ı1£©¡£
-	//½áÊø£¨ÆäËûÎ´Ìáµ½µÄ²ÎÊı¶¼²»ÓÃµ÷£©
+	pid_inner_test.index_min = 5;//è¿™é‡Œå–ç¬¬errvæœ€ç»ˆå˜åŒ–ç¼“æ…¢çš„å€¼
+	//è°ƒå‚æŠ€å·§å…³æ³¨æŒ‡æ ‡ï¼Œ1ã€xå¯¹äºç›®æ ‡å€¼å“åº”é€Ÿåº¦å’Œç¨³å®šæ€§ï¼Œ2ã€errvå¯¹äº0çš„å“åº”é€Ÿåº¦å’Œç¨³å®šæ€§
+	//ä¸ªäººæ¨èé¡ºåºï¼š
+	//1ã€å†…å¤–ç¯Pé¡ºä¾¿ç½®å…¥ä¸€ä¸ªå€¼ã€‚å¦‚1ä½¿å¾—ç³»ç»Ÿèƒ½å¤Ÿå‹‰å¼ºç¨³å®š
+	//2ã€å°†å¤–ç¯Pè°ƒæ•´åˆ°ä½ æ»¡æ„çš„å“åº”é€Ÿåº¦ã€‚ï¼ˆæŒ‡ç¬¬ä¸€æ¬¡åˆ°è¾¾ç›®æ ‡ä½ç½®ï¼‰
+	//3ã€å¦‚æœå‘ç”Ÿé•¿æœŸä¸èƒ½ç¨³å®šï¼ŒåŠ å¤§å†…ç¯Pä½¿ç³»ç»Ÿé€Ÿåº¦è·Ÿéšèƒ½å¤Ÿæ›´å¥½åœ°è·Ÿéšç›®æ ‡é€Ÿåº¦ï¼ˆæ­¤æ—¶æŒ¯åŠ¨é¢‘ç‡å¯èƒ½æ›´å¤§ï¼Œä½†æ˜¯æŒ¯åŠ¨å¹…åº¦æ›´å°ï¼‰
+	//å°†pè°ƒæ•´åˆ°æŒ¯åŠ¨å¹…åº¦è®©è‡ªå·±æ»¡æ„
+	//4ã€å¦‚æœç³»ç»Ÿè¡¨ç°è‰¯å¥½åˆ™è°ƒå‚å®Œæˆï¼Œè‹¥è°ƒå®Œå‘ç°ç³»ç»Ÿæœ‰å°å¹…é«˜é¢‘æŒ¯åŠ¨ï¼Œå°†å†…ç¯dè°ƒæ•´åˆ°æœ€é«˜0.99ï¼ˆä¸è¶…è¿‡1ï¼‰ã€‚
+	//ç»“æŸï¼ˆå…¶ä»–æœªæåˆ°çš„å‚æ•°éƒ½ä¸ç”¨è°ƒï¼‰
 }
 
 
@@ -93,13 +93,13 @@ float PID_run(float _x, float _v)
 	float a = 0;
 
 	return(a = cascadePID_control_float(80, _x, &pid_test,
-		_v, &pid_inner_test));//7ĞĞ1Ãë)
+		_v, &pid_inner_test));//7è¡Œ1ç§’)
 
 
 }
-int main()//²âÊÔ
+int main()//æµ‹è¯•
 {
-	//Ä£Äâ¶ş½×ÏµÍ³
+	//æ¨¡æ‹ŸäºŒé˜¶ç³»ç»Ÿ
 	float a = 0;
 	float x = 0;
 	float v = 0;
@@ -111,7 +111,7 @@ int main()//²âÊÔ
 		v += a/Fre ;
 		x += v/Fre ;
 		if (count%10 == 0)
-		printf("x=%03.0f errv=%03.0f\t", x, pid_inner_test.err);//´°¿Úµ÷ÊÔ
+		printf("x=%03.0f errv=%03.0f\t", x, pid_inner_test.err);//çª—å£è°ƒè¯•
 
 		if (count++ == 60)
 		{
